@@ -8,3 +8,7 @@
 .primary-color{
     @apply bg-blue-700 text-white;
 }
+
+/* body{
+    background: gray;
+} */
