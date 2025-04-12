@@ -1,18 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Modal from "./modal";
 
 const RecentWork = () => {
   interface Job {
-    _id: string;
+    id: string;
     date: string;
     name: string;
     amount: number;
-    // vehicleNo: string;
-    // work: { description: string }[];
   }
 
   const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [compnayId, setCompanyId] = useState("");
 
   useEffect(() => {
     const getAllJobs = async () => {
@@ -29,6 +30,16 @@ const RecentWork = () => {
 
     getAllJobs();
   }, []);
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const handleRowClick = (id: string) => {
+    console.log(id);
+    setCompanyId(id);
+    setShowModal(true);
+  };
 
   return (
     <div>
@@ -73,28 +84,20 @@ const RecentWork = () => {
         {jobs &&
           jobs?.map((job) => (
             <tbody
-              key={job._id}
+              onClick={() => handleRowClick(job.id)}
+              key={job.id}
               className="text-sm text-gray-700 divide-y divide-gray-200">
               <tr className="divide-x divide-gray-200">
                 <td className="px-4 py-3">{job.date}</td>
                 <td className="px-4 py-3">{job.name}</td>
-
-                {/* <td className="px-4 py-3 text-green-600 font-semibold">
-                <select
-                  className="border border-green-600 px-2 py-1 rounded-md"
-                  name="status"
-                  id="status">
-                  <option value="paid">Paid</option>
-                  <option value="partial">Partial</option>
-                  <option value="Pending">Pending</option>
-                </select>
-              </td> */}
-                {/* <td className="px-4 py-3">$5,000</td> */}
-                <td className="px-4 py-3"> ₹{job.amount}</td>
+                <td className="px-4 py-3 font-bold">
+                  <span className="font-bold">₹</span> {job.amount}
+                </td>
               </tr>
             </tbody>
           ))}
       </table>
+      {showModal && <Modal companyId={compnayId} closeModal={closeModal} />}
     </div>
   );
 };

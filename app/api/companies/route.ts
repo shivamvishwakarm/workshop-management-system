@@ -15,3 +15,16 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: 'Failed to create company' }, { status: 500 });
     }
 }
+
+export async function GET() {
+    await dbConnect();
+
+    try {
+        const companies = await Company.find({}).lean();
+        console.log(companies);
+        return NextResponse.json({ success: true, data: companies });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ success: false, message: 'Failed to fetch companies' }, { status: 500 });
+    }
+}

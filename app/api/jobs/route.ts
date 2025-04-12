@@ -4,6 +4,7 @@ import Company from '@/app/models/Company';
 import mongoose from 'mongoose';
 import { Work, Works } from '@/app/models/schema';
 
+
 export async function POST(req: Request) {
     await dbConnect();
 
@@ -79,23 +80,17 @@ export async function GET(req: Request) {
     await dbConnect();
 
     try {
-        // const { searchParams } = new URL(req.url);
-        // const status = searchParams.get('status'); // Optional filter
-        // const company = searchParams.get('company'); // Optional filter
-
-        // const query: any = {};
-        // if (status) query.paymentStatus = status;
-        // if (company) query.company = company;
-
-        const jobs = await Works.find({})
-
-
-        console.log("jobs", jobs);
-
-        // const jobs = await ServiceRecordSchema.find(query).populate('company');
-        return NextResponse.json({ success: true, data: jobs });
+        console.log("req>>", req);
+        const url = new URL(req.url);
+        const companyId = url.searchParams.get('companyId');
+        const works = await Works.find({ company: companyId }).lean();
+        return NextResponse.json({ success: true, data: works });
     } catch (error) {
-        console.log(error)
-        return NextResponse.json({ success: false, message: 'Failed to fetch jobs' }, { status: 500 });
+        console.error("Error fetching works:", error);
+        return NextResponse.json(
+            { success: false, message: "Failed to fetch works", error },
+            { status: 500 }
+        );
     }
 }
+

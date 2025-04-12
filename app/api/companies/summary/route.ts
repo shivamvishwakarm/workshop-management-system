@@ -17,6 +17,11 @@ export async function GET(req: Request) {
         const companyQuery: any = {};
         if (name) companyQuery.name = name;
 
+        console.log("companyquery", companyQuery);
+        console.log(await Company.find({}).populate({
+            path: 'works'
+        }));
+
         // Fetch companies with optional name filter
         const companies = await Company.find(companyQuery)
             .populate({
@@ -60,9 +65,9 @@ export async function GET(req: Request) {
         console.log(util.inspect(data, { showHidden: true, depth: null, colors: true }));
 
 
-        const sendData: { name: string; date: string; amount: number }[] = [];
+        const sendData: { id: string; name: string; date: string; amount: number }[] = [];
         data.map((d) => {
-            const o = { name: d.name, amount: 0, date: "" };
+            const o = { id: d._id, name: d.name, amount: 0, date: "" };
             let latestDate: Date | null = null; // Explicitly type as Date | null
 
             let totalAmount = 0;
