@@ -1,125 +1,89 @@
 "use client";
-
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 
-type WorkRow = {
-  description: string;
-  quantity: string;
-  amount: number;
-  status: string;
-};
-
-type FormData = {
-  company: string;
-  vehicleNo: string;
-  date: string;
-  workRows: WorkRow[];
-  image: File | null;
-};
-
-const WorkRowComponent = ({
-  index,
-  register,
-}: {
-  index: number;
-  register: any;
-  workRow: WorkRow;
-}) => {
-  return (
-    <tr className="bg-white border-b">
-      <td className="p-2">
-        <textarea
-          {...register(`workRows.${index}.description`)}
-          className="border border-gray-300 p-2 rounded w-full min-h-[60px]"
-        />
-      </td>
-      <td className="p-2">
-        <input
-          placeholder="Quantity"
-          type="number"
-          {...register(`workRows.${index}.quantity`)}
-          className="border border-gray-300 p-2 rounded w-full"
-        />
-      </td>
-      <td className="p-2">
-        <input
-          placeholder="Total amount"
-          type="number"
-          {...register(`workRows.${index}.amount`)}
-          className="border border-gray-300 p-2 rounded w-full"
-        />
-      </td>
-      <td className="p-2">
-        <select
-          {...register(`workRows.${index}.status`)}
-          className="border border-gray-300 p-2 rounded w-full">
-          <option value="">Select Status</option>
-          <option value="Pending">Pending</option>
-          <option value="Completed">Completed</option>
-        </select>
-      </td>
-    </tr>
-  );
-};
-
 const AddWorkForm = () => {
-  const [companies, setCompanies] = useState<{ _id: string; name: string }[]>(
-    []
-  );
-  const { register, handleSubmit, watch, control, setValue } =
-    useForm<FormData>({
-      defaultValues: {
-        company: "",
-        vehicleNo: "",
-        date: "",
-        workRows: [{ description: "", quantity: "", amount: 0, status: "" }],
-        image: null,
-      },
-    });
+  const [companies, setCompanies] = useState([]);
   const [customInput, setCustomInput] = useState(false);
+  const { register, handleSubmit, control, watch, setValue } = useForm({
+    defaultValues: {
+      company: "",
+      workRows: [
+        {
+          description: "",
+          quantity: "",
+          amount: 0,
+          status: "",
+          date: Date,
+          vehicleNo: "",
+        },
+      ],
+    },
+  });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "workRows",
   });
 
+  // Watch all rows or specific fields
   const workRows = watch("workRows");
-  const [totalAmount, setTotalAmount] = useState(0);
 
-  useEffect(() => {
-    let total = 0;
-    workRows.forEach((workRow) => {
-      console.log("workRow.amount", workRow.amount);
-      total += Number(workRow.amount);
-    });
-    setTotalAmount(total);
-  }, [workRows]);
+  // Calculate total dynamically by watching `amount` fields
+  const totalAmount = workRows.reduce(
+    (sum, row) => sum + (Number(row.amount) || 0),
+    0
+  );
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data) => {
     console.log("Form Data:", data);
     const response = await axios.post("/api/jobs", data);
     console.log(response.data);
   };
 
+  const handleAddRow = () => {
+    const lastRow = workRows[workRows.length - 1];
+    if (
+      lastRow.description.trim() === "" ||
+      !lastRow.quantity ||
+      !lastRow.amount
+    ) {
+      alert(
+        "Please fill in all fields of the last row before adding a new row."
+      );
+      return;
+    }
+    append({
+      description: "",
+      quantity: "",
+      amount: 0,
+      status: "",
+      date: Date,
+      vehicleNo: "",
+    });
+  };
+
+  const handleRemoveRow = (index) => {
+    if (fields.length === 1) {
+      alert("At least one work row is required.");
+      return;
+    }
+    remove(index);
+  };
+
   useEffect(() => {
-    const c = async () => {
+    const fetchCompanies = async () => {
       try {
         const data = await axios.get("/api/companies");
-        console.log("data.data.data", data.data.data);
         setCompanies(data.data.data);
       } catch (error) {
         console.log(error);
       }
     };
 
-    c();
+    fetchCompanies();
   }, []);
-
-  useEffect(() => {
-    console.log("companies", companies);
-  }, [setCompanies, companies]);
 
   return (
     <form
@@ -140,7 +104,6 @@ const AddWorkForm = () => {
               }
             }}>
             <option value="">Select Existing Company</option>
-
             <option className="text-blue-500" value="custom">
               Add New Company
             </option>
@@ -166,69 +129,104 @@ const AddWorkForm = () => {
             </button>
           </div>
         )}
-
-        <input
-          type="text"
-          placeholder="Vehicle No."
-          {...register("vehicleNo")}
-          className="border border-gray-300 p-2 rounded"
-        />
-        <input
-          type="date"
-          {...register("date")}
-          className="border border-gray-300 p-2 rounded"
-        />
       </div>
 
       {/* Work Rows Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mt-4">
         <table className="w-full text-left border border-gray-300 rounded-lg overflow-hidden">
           <thead className="bg-gray-800 text-white">
             <tr>
               <th className="p-2">Work Description</th>
+
+              <th className="p-2">Vehicle NO.</th>
               <th className="p-2">Quantity</th>
               <th className="p-2">Amount</th>
               <th className="p-2">Status</th>
+
+              <th className="p-2">Date</th>
+              <th className="p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {fields.map((field, index) => (
-              <WorkRowComponent
-                key={field.id}
-                index={index}
-                register={register}
-                workRow={workRows[index]}
-              />
+              <tr key={field.id} className="bg-white border-b">
+                <td className="p-2">
+                  <textarea
+                    {...register(`workRows.${index}.description`)}
+                    className="border border-gray-300 p-2 rounded w-full min-h-[60px]"
+                  />
+                </td>
+                <td className="p-2">
+                  <input
+                    placeholder="Vehicle No."
+                    type="text"
+                    {...register(`workRows.${index}.vehicleNo`)}
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                </td>
+                <td className="p-2">
+                  <input
+                    placeholder="Quantity"
+                    type="number"
+                    {...register(`workRows.${index}.quantity`)}
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                </td>
+                <td className="p-2">
+                  <input
+                    placeholder="Amount"
+                    type="number"
+                    {...register(`workRows.${index}.amount`)}
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                </td>
+                <td className="p-2">
+                  <select
+                    {...register(`workRows.${index}.status`)}
+                    className="border border-gray-300 p-2 rounded w-full">
+                    <option value="">Select Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
+                </td>
+
+                <td className="p-2">
+                  <input
+                    type="date"
+                    {...register(`workRows.${index}.date`)}
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                </td>
+                <td className="p-2">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveRow(index)}
+                    className="text-red-600 underline">
+                    Delete
+                  </button>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>
         <div className="mt-2">
           <button
             type="button"
-            onClick={() =>
-              append({ description: "", quantity: "", amount: 0, status: "" })
-            }
+            onClick={handleAddRow}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Add Row
           </button>
         </div>
       </div>
 
-      {/* Image Upload */}
-      <div>
-        <label className="block font-medium mb-1">Upload Image</label>
+      {/* Total Amount */}
+      <div className="mt-4">
+        <label className="block font-medium mb-1">Total Amount</label>
         <input
-          multiple
-          type="file"
-          accept="image/*"
-          {...register("image")}
-          className="block w-full border border-gray-300 p-2 rounded"
-        />
-        <input
-          className="border border-gray-300 p-2 rounded"
           type="text"
           value={totalAmount}
           disabled
+          className="border border-gray-300 p-2 rounded w-full bg-gray-200"
         />
       </div>
 

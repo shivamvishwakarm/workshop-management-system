@@ -45,7 +45,7 @@ const RecentWork = () => {
     <div>
       <div>
         <div className="flex justify-between">
-          <h4 className="font-bold text-2xl px-2 pb-2">Recent work data: </h4>
+          <h4 className="font-bold text-2xl px-2 pb-2">Company summary: </h4>
           <div className="space-x-2">
             <input
               className="border border-black "
