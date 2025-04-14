@@ -5,6 +5,7 @@ import mongoose, { Document } from 'mongoose';
 export interface Companies extends Document {
     name: string;
     phoneNumber: string;
+    totalAmount: number;
     works: mongoose.Schema.Types.ObjectId[];
 }
 export interface Works extends Document {
@@ -23,6 +24,7 @@ export interface Works extends Document {
 const CompanySchema = new mongoose.Schema<Companies>({
     name: { type: String, required: true, unique: true },
     phoneNumber: { type: String },
+    totalAmount: { type: Number, default: 0 },
     works: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Work' }],
 }, { timestamps: true });
 

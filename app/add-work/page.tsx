@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm, useFieldArray } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 const AddWorkForm = () => {
+  const router = useRouter();
   const [companies, setCompanies] = useState([]);
   const [customInput, setCustomInput] = useState(false);
   const { register, handleSubmit, control, watch, setValue } = useForm({
@@ -39,6 +41,9 @@ const AddWorkForm = () => {
   const onSubmit = async (data) => {
     console.log("Form Data:", data);
     const response = await axios.post("/api/jobs", data);
+    if (response.data.success) {
+      router.push("/");
+    }
     console.log(response.data);
   };
 

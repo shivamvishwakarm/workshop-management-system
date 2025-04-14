@@ -8,27 +8,25 @@ const RecentWork = () => {
     id: string;
     date: string;
     name: string;
-    amount: number;
+    totalAmount: number;
   }
 
-  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [companies, setCompanies] = useState<Job[] | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [compnayId, setCompanyId] = useState("");
 
   useEffect(() => {
-    const getAllJobs = async () => {
+    const fetchCompanies = async () => {
       try {
-        const data = await axios.get("/api/companies/summary");
-
-        console.log("data.data.data", data.data.sendData);
-
-        setJobs(data.data.sendData);
+        const data = await axios.get("/api/companies");
+        console.log(data.data.data);
+        setCompanies(data.data.data);
       } catch (error) {
         console.log(error);
       }
     };
 
-    getAllJobs();
+    fetchCompanies();
   }, []);
 
   const closeModal = () => {
@@ -72,7 +70,6 @@ const RecentWork = () => {
       <table className="w-full table-auto border-separate border-spacing-0 text-left overflow-x-auto">
         <thead className="bg-gray-100 border-b-2 border-gray-300">
           <tr className="text-gray-600 uppercase text-sm font-medium [&>th:not(:last-child)]:border-r [&>th]:border-gray-300">
-            <th className="px-4 py-3">Date</th>
             <th className="px-4 py-3">Company</th>
 
             {/* <th className="px-4 py-3">Status</th> */}
@@ -81,17 +78,16 @@ const RecentWork = () => {
           </tr>
         </thead>
 
-        {jobs &&
-          jobs?.map((job) => (
+        {companies &&
+          companies?.map((job, idx) => (
             <tbody
               onClick={() => handleRowClick(job.id)}
-              key={job.id}
+              key={idx}
               className="text-sm text-gray-700 divide-y divide-gray-200">
               <tr className="divide-x divide-gray-200">
-                <td className="px-4 py-3">{job.date}</td>
                 <td className="px-4 py-3">{job.name}</td>
                 <td className="px-4 py-3 font-bold">
-                  <span className="font-bold">₹</span> {job.amount}
+                  <span className="font-bold">₹</span> {job.totalAmount}
                 </td>
               </tr>
             </tbody>
