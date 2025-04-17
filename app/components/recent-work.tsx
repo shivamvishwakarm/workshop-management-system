@@ -14,21 +14,37 @@ const RecentWork = () => {
   const [companies, setCompanies] = useState<Job[] | null>(null);
   const [editingCompanyId, setEditingCompanyId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filteredCompanies, setFilteredCompanies] = useState<Job[] | null>(
+    null
+  );
   const router = useRouter();
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const data = await axios.get("/api/companies");
-        setCompanies(data.data.data);
+        const { data } = await axios.get("/api/companies");
+        setCompanies(data.data);
+        setFilteredCompanies(data.data);
       } catch (error) {
         alert(error);
-        console.log(error);
+        console.error(error);
       }
     };
 
     fetchCompanies();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = companies?.filter((company) =>
+        company.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCompanies(filtered || []);
+    } else {
+      setFilteredCompanies(companies);
+    }
+  }, [searchQuery, companies]);
 
   const handleEditClick = (id: string, currentName: string) => {
     setEditingCompanyId(id);
@@ -49,7 +65,7 @@ const RecentWork = () => {
       setEditedName("");
     } catch (error) {
       alert("Failed to update company name.");
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -68,20 +84,20 @@ const RecentWork = () => {
     <div>
       <div>
         <div className="flex justify-between">
-          <h4 className="font-bold text-2xl px-2 pb-2">Company summary: </h4>
+          <h4 className="font-bold text-2xl px-2 pb-2">Company Summary: </h4>
           <div className="space-x-2">
             <input
               className="border-2 border-black mx-2 px-2 py-1 rounded-md"
               type="text"
-              name=""
-              id=""
               placeholder="Search By Company Name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
       </div>
 
-      <table className="w-full table-auto border-separate border-spacing-0 text-left overflow-x-auto overflow-y-auto px-10 rounded max-h-[500px]">
+      <table className="w-full table-auto border-separate border-spacing-0 text-left overflow-x-auto">
         <thead className="bg-gray-100 border-b-2 border-gray-300">
           <tr className="text-gray-600 uppercase text-sm font-medium [&>th:not(:last-child)]:border-r [&>th]:border-gray-300">
             <th className="px-4 py-3">Company</th>
@@ -89,57 +105,62 @@ const RecentWork = () => {
             <th className="px-4 py-3">Action</th>
           </tr>
         </thead>
-
-        {companies &&
-          companies.map((job) => (
-            <tbody
-              key={job._id}
-              className="text-sm text-gray-700 divide-y divide-gray-200 ">
-              <tr className="divide-x divide-gray-200">
+        <tbody>
+          {filteredCompanies &&
+            filteredCompanies.map((company) => (
+              <tr
+                onClick={() => handleRowClick(company._id)}
+                key={company._id}
+                className="divide-x divide-gray-200 cursor-pointer hover:bg-gray-100">
                 <td className="px-4 py-3">
-                  {editingCompanyId === job._id ? (
+                  {editingCompanyId === company._id ? (
                     <input
+                      className="border border-gray-300 rounded-md px-2 py-1"
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className="border px-2 py-1 rounded-md"
                     />
                   ) : (
-                    <span
-                      className="cursor-pointer"
-                      onClick={() => handleRowClick(job._id)}>
-                      {job.name}
-                    </span>
+                    company.name
                   )}
                 </td>
                 <td className="px-4 py-3 font-bold">
-                  <span className="font-bold">₹</span> {job.totalAmount}
+                  <span className="font-bold">₹</span> {company.totalAmount}
                 </td>
                 <td className="px-4 py-3">
-                  {editingCompanyId === job._id ? (
+                  {editingCompanyId === company._id ? (
                     <div className="space-x-2">
                       <button
-                        className="text-green-500"
-                        onClick={() => handleSaveClick(job._id)}>
+                        className="bg-blue-500 text-white px-3 py-1 rounded-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSaveClick(company._id);
+                        }}>
                         Save
                       </button>
                       <button
-                        className="text-red-500"
-                        onClick={handleCancelClick}>
+                        className="bg-gray-500 text-white px-3 py-1 rounded-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancelClick();
+                        }}>
                         Cancel
                       </button>
                     </div>
                   ) : (
                     <button
-                      className="cursor-pointer text-white bg-blue-500 px-3 py-1 text-lg rounded-md"
-                      onClick={() => handleEditClick(job._id, job.name)}>
-                      Edit Company Name
+                      className="bg-green-500 text-white px-3 py-1 rounded-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick(company._id, company.name);
+                      }}>
+                      Edit
                     </button>
                   )}
                 </td>
               </tr>
-            </tbody>
-          ))}
+            ))}
+        </tbody>
       </table>
     </div>
   );
