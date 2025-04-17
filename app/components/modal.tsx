@@ -1,61 +1,192 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-
-interface Work {
-  date: string;
-  vehicleNo: string;
-}
+import { useForm } from "react-hook-form";
+import { WorkRow } from "../utils/types";
+import { FC } from "react";
 
 interface ModalProps {
   closeModal: () => void;
-  companyId: string;
+  currentWork: WorkRow;
 }
 
-const Modal: React.FC<ModalProps> = ({ closeModal, companyId }) => {
-  const [works, setWorks] = useState<Work[]>([]);
-  useEffect(() => {
-    (async () => {
-      const response = await axios.get("/api/jobs", { params: { companyId } });
+const Modal: FC<ModalProps> = ({ closeModal, currentWork }) => {
+  // Initialize react-hook-form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      _id: currentWork._id,
+      date: currentWork?.date ? currentWork.date.split("T")[0] : "",
+      description: currentWork.description || "",
+      amount:
+        typeof currentWork.amount === "number" ? currentWork.amount : null,
+      quantity: currentWork.quantity || 0,
+      status: currentWork.status || "Pending",
+      vehicleNo: currentWork.vehicleNo || "",
+    },
+  });
 
-      console.log("jobs>>", response.data.data);
-      console.log("jobs", response.data.data);
-      setWorks(response.data.data);
-    })();
-  }, [companyId]);
+  const sendData = async (data: WorkRow) => {
+    try {
+      const response = await axios.put(`/api/jobs/?id=${currentWork._id}`, {
+        ...data,
+        _id: currentWork._id,
+      });
+      if (response.data.success) {
+        closeModal();
+      }
+      console.log("Response from API:", response.data);
+      console.log(data);
+    } catch (error) {
+      console.error("Error during API call:", error);
+    }
+  };
+
+  // Handle form submission
+
+  const onSubmit = (data: WorkRow) => {
+    sendData(data);
+  };
 
   return (
-    <div>
-      {/* Modal content */}
-      <div className="flex justify-between w-full">
-        <h1>Modal</h1>
-        <p>company id {companyId}</p>
-        <button onClick={closeModal}>Close</button>
+    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-[1px] bg-opacity-50">
+      <div className="w-[60%] bg-white p-6 rounded-md shadow-md">
+        <div className="flex justify-between">
+          <h2 className="text-2xl font-bold mb-4">Edit Work</h2>
+          <button
+            className="z-[100] text-gray-600 hover:text-gray-800"
+            onClick={closeModal}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-gray-600 font-semibold mb-2">
+              Date
+            </label>
+            <input
+              type="date"
+              {...register("date", { required: "Date is required" })}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            {errors.date && (
+              <p className="text-red-500 text-sm">
+                {errors.date.message?.toString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold mb-2">
+              Description
+            </label>
+            <input
+              type="text"
+              {...register("description", {
+                required: "Description is required",
+                maxLength: {
+                  value: 100,
+                  message: "Description cannot exceed 100 characters",
+                },
+              })}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            {errors.description && (
+              <p className="text-red-500 text-sm">
+                {errors.description.message?.toString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold mb-2">
+              Amount
+            </label>
+            <input
+              type="number"
+              {...register("amount", {
+                required: "Amount is required",
+                valueAsNumber: true,
+                min: { value: 1, message: "Amount must be greater than 0" },
+              })}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            {errors.amount && (
+              <p className="text-red-500 text-sm">
+                {errors.amount.message?.toString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold mb-2">
+              Quantity
+            </label>
+            <input
+              type="number"
+              {...register("quantity")}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            {errors.quantity && (
+              <p className="text-red-500 text-sm">
+                {errors.quantity?.message?.toString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold mb-2">
+              Status
+            </label>
+            <select
+              {...register("status", { required: "Status is required" })}
+              className="w-full p-2 border border-gray-300 rounded-md">
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+            </select>
+            {errors.status && (
+              <p className="text-red-500 text-sm">
+                {errors.status.message?.toString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-gray-600 font-semibold mb-2">
+              Vehicle No
+            </label>
+            <input
+              type="text"
+              {...register("vehicleNo", {
+                required: "Vehicle number is required",
+                pattern: {
+                  value: /^[A-Za-z0-9\s-]+$/,
+                  message: "Invalid vehicle number format",
+                },
+              })}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            {errors.vehicleNo && (
+              <p className="text-red-500 text-sm">
+                {errors.vehicleNo.message?.toString()}
+              </p>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+            Save
+          </button>
+        </form>
       </div>
-
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Date</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>
-              Vehicle
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {works &&
-            works.map((row, index) => (
-              <tr key={index}>
-                <td style={{ border: "1px solid #ccc", padding: "8px" }}>
-                  {row.date}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "8px" }}>
-                  {row.vehicleNo}
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-      <table></table>
     </div>
   );
 };

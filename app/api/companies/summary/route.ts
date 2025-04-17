@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/dbConnect';
-import { Company } from '@/app/models/schema';
+import { Company, Work } from '@/app/models/schema';
+import { WorkRow } from '@/app/utils/types';
 
-export async function GET(req: Request) {
+export async function GET() {
     await dbConnect();
 
-    const url = new URL(req.url);
+
     // const name = url.searchParams.get('name');
     // const status = url.searchParams.get('status');
 
@@ -20,9 +21,24 @@ export async function GET(req: Request) {
             })
             .lean()
 
-        console.log("companies", companies);
 
-        return NextResponse.json({ success: true, companies });
+
+        const companiesWithWorks = companies.map((company) => {
+            const works = company.works;
+
+            works.map((work: WorkRow) => {
+                const getWork = Work.findById(work._id);
+                console.log("works>>>>", getWork);
+            })
+        });
+
+
+
+
+
+
+
+        return NextResponse.json({ success: true, companiesWithWorks });
     } catch (error) {
         console.error('Error fetching companies with works:', error);
         return NextResponse.json(

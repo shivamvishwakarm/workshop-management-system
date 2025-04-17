@@ -11,7 +11,7 @@ export interface Companies extends Document {
 export interface Works extends Document {
     description: string;
     amount: number;
-    quantity: number;
+    quantity: number | null;
     status: string;
     date: Date;
     vehicleNo: string;
