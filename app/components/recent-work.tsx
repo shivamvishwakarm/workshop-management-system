@@ -74,6 +74,20 @@ const RecentWork = () => {
     setEditedName("");
   };
 
+  const handleDeleteClick = async (id: string) => {
+    try {
+      await axios.delete(`/api/companies/?id=${id}`);
+      setCompanies((prevCompanies) =>
+        prevCompanies
+          ? prevCompanies.filter((company) => company._id !== id)
+          : null
+      );
+    } catch (error) {
+      alert("Failed to delete company.");
+      console.error(error);
+    }
+  };
+
   const handleRowClick = (id: string) => {
     if (editingCompanyId !== id) {
       router.push(`/works/${id}`);
@@ -81,7 +95,7 @@ const RecentWork = () => {
   };
 
   return (
-    <div>
+    <div className="mb-32   max-h-[400px] mx-auto overflow-y-auto ">
       <div>
         <div className="flex justify-between">
           <h4 className="font-bold text-2xl px-2 pb-2">Company Summary: </h4>
@@ -148,14 +162,24 @@ const RecentWork = () => {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      className="bg-green-500 text-white px-3 py-1 rounded-md"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditClick(company._id, company.name);
-                      }}>
-                      Edit
-                    </button>
+                    <div className="space-x-2">
+                      <button
+                        className="bg-green-500 text-white px-3 py-1 rounded-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(company._id, company.name);
+                        }}>
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-3 py-1 rounded-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(company._id);
+                        }}>
+                        Delete
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>

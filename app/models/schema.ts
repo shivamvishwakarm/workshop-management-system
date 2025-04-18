@@ -44,13 +44,3 @@ const WorkSchema = new mongoose.Schema<Works>({
 
 export const Company = mongoose.models.Company || mongoose.model<Companies>('Company', CompanySchema);
 export const Work = mongoose.models.Work || mongoose.model<Works>('Work', WorkSchema);
-
-
-
-
-
-
-
-
-
-

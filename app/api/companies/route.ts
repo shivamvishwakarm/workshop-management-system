@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/dbConnect';
-import { Company } from '@/app/models/schema';
+import { Company, Work } from '@/app/models/schema';
 
 
 export async function POST(req: Request) {
@@ -61,5 +61,28 @@ export async function PUT(req: Request) {
     } catch (error) {
         console.error(error);
         return NextResponse.json({ success: false, message: 'Failed to update company' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    await dbConnect();
+    const url = new URL(req.url);
+    const id = url.searchParams.get('id');
+    try {
+        const deletedCompany = await Company.findByIdAndDelete(id);
+        if (!deletedCompany) {
+            return NextResponse.json({ success: false, message: 'Company not found' }, { status: 404 });
+        }
+
+        deletedCompany.works.forEach(async (workId: string) => {
+            await Work.findByIdAndDelete(workId);
+        });
+
+
+        console.log(`deletedCompany: ${deletedCompany}`)
+        return NextResponse.json({ success: true, data: deletedCompany });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ success: false, message: 'Failed to delete company' }, { status: 500 });
     }
 }
