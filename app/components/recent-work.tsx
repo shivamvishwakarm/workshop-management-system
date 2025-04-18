@@ -75,6 +75,13 @@ const RecentWork = () => {
   };
 
   const handleDeleteClick = async (id: string) => {
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this company?"
+    );
+    if (!confirmDelete) {
+      return;
+    }
+
     try {
       await axios.delete(`/api/companies/?id=${id}`);
       setCompanies((prevCompanies) =>
