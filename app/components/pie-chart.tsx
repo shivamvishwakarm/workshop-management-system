@@ -55,7 +55,7 @@ export default function PieChart({
   });
 
   return (
-    <div className="w-full flex justify-center items-center ">
+    <div className="w-full flex justify-center items-center p-4">
       <svg
         width={size}
         height={size}

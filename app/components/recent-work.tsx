@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
+import Image from "next/image";
 const RecentWork = () => {
   interface Job {
     _id: string;
@@ -102,19 +102,20 @@ const RecentWork = () => {
   };
 
   return (
-    <div className="mb-32   max-h-[400px] mx-auto overflow-y-auto ">
+    <div className="mb-32   max-h-[400px] md:mx-auto overflow-y-auto md:p-10 p-2">
       <div>
-        <div className="flex justify-between">
-          <h4 className="font-bold text-2xl px-2 pb-2">Company Summary: </h4>
-          <div className="space-x-2">
-            <input
-              className="border-2 border-black mx-2 px-2 py-1 rounded-md"
-              type="text"
-              placeholder="Search By Company Name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        <div className="flex flex-row items-center justify-between w-full  p-2">
+          <h4 className="font-bold text-sm md:text-2xl text-center md:text-left pb-2">
+            Company Summary:
+          </h4>
+
+          <input
+            className="border-2 border-black px-2 py-1 rounded-md md:w-1/5  w-1/2 "
+            type="text"
+            placeholder="Search By Company Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
 
@@ -136,7 +137,7 @@ const RecentWork = () => {
                 <td className="px-4 py-3">
                   {editingCompanyId === company._id ? (
                     <input
-                      className="border border-gray-300 rounded-md px-2 py-1"
+                      className="border border-gray-300 rounded-md px-2 py-1 w-full"
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
@@ -150,7 +151,7 @@ const RecentWork = () => {
                 </td>
                 <td className="px-4 py-3">
                   {editingCompanyId === company._id ? (
-                    <div className="space-x-2">
+                    <div className="space-x-2 space-y-2">
                       <button
                         className="bg-blue-500 text-white px-3 py-1 rounded-md"
                         onClick={(e) => {
@@ -169,22 +170,32 @@ const RecentWork = () => {
                       </button>
                     </div>
                   ) : (
-                    <div className="space-x-2">
+                    <div className="md:space-x-2 md:text-left text-center">
                       <button
-                        className="bg-green-500 text-white px-3 py-1 rounded-md"
+                        className=" md:px-3 md:py-1 rounded-md"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditClick(company._id, company.name);
                         }}>
-                        Edit
+                        <Image
+                          src="icons/edit.svg"
+                          alt="Edit"
+                          width={20}
+                          height={20}
+                        />
                       </button>
                       <button
-                        className="bg-red-500 text-white px-3 py-1 rounded-md"
+                        className=" text-white px-3 py-1 rounded-md"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteClick(company._id);
                         }}>
-                        Delete
+                        <Image
+                          src="icons/delete.svg"
+                          alt="Edit"
+                          width={20}
+                          height={20}
+                        />
                       </button>
                     </div>
                   )}
