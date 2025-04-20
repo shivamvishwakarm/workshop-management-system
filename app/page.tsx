@@ -14,10 +14,6 @@ export default function Home() {
       </h1>
       <Navbar />
 
-      {/* pichart for paid and upaid*/}
-      {/* <PieChart data={pieData} /> */}
-
-      {/* table  */}
       <RecentWork />
     </main>
   );

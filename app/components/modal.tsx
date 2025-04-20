@@ -50,12 +50,12 @@ const Modal: FC<ModalProps> = ({ closeModal, currentWork }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-[1px] bg-opacity-50">
-      <div className="w-[60%] bg-white p-6 rounded-md shadow-md">
-        <div className="flex justify-between">
-          <h2 className="text-2xl font-bold mb-4">Edit Work</h2>
+    <div className=" fixed inset-0 flex items-center justify-center backdrop-blur-[4px] bg-opacity-50">
+      <div className="md:w-[60%] w-[80%] md:h-[70%] h-[50%] bg-white p-6 rounded-md shadow-md overflow-y-scroll pt-18">
+        <div className="fixed flex justify-between items-center text-center bg-blue-500 text-white md:w-[60%] w-[80%] top-[25%] md:top-[10%] left-1/2 -translate-x-1/2 px-2 py-3 rounded-md shadow-blue-200 shadow-lg">
+          <h2 className="text-2xl font-bold ">Edit Work</h2>
           <button
-            className="z-[100] text-gray-600 hover:text-gray-800"
+            className="z-[100] text-white hover:text-gray-800 cursor-pointer"
             onClick={closeModal}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

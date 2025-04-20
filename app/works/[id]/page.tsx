@@ -51,7 +51,7 @@ const Page = () => {
       {/* Page Header */}
       <h1 className="text-2xl md:text-3xl font-bold px-2 md:px-4 py-2 mb-4">
         <span
-          className="cursor-pointer text-xl md:text-3xl font-bold px-2 md:px-4 py-1 md:py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800 transition mx-1 md:mx-2"
+          className="cursor-pointer text-xl md:text-3xl font-bold px-2 md:px-4 py-1 md:py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800 transition mx-1 md:mx-2 text-center"
           onClick={() => route.back()}>
           ←
         </span>
@@ -100,7 +100,7 @@ const Page = () => {
                   {work.description}
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2 font-black">
-                  ₹{work.amount}
+                  ₹ {work.amount}
                 </td>
                 <td className="border border-gray-300 px-2 md:px-4 py-2">
                   {work.quantity}
@@ -129,7 +129,8 @@ const Page = () => {
 
       {/* Total Pending Amount */}
       <p className="font-bold pt-4 text-sm md:text-lg">
-        Total Pending Amount: ₹{totalPendingAmount}
+        Total Pending Amount:{" "}
+        <span className="font-black text-base">₹ {totalPendingAmount}</span>
       </p>
 
       {/* Modal */}

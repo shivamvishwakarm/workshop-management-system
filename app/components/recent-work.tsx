@@ -18,15 +18,19 @@ const RecentWork = () => {
   const [filteredCompanies, setFilteredCompanies] = useState<Job[] | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
+        setIsLoading(true);
         const { data } = await axios.get("/api/companies");
         setCompanies(data.data);
         setFilteredCompanies(data.data);
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         alert(error);
         console.error(error);
       }
@@ -37,12 +41,15 @@ const RecentWork = () => {
 
   useEffect(() => {
     if (searchQuery) {
+      setIsLoading(true);
       const filtered = companies?.filter((company) =>
         company.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredCompanies(filtered || []);
+      setIsLoading(false);
     } else {
       setFilteredCompanies(companies);
+      setIsLoading(false);
     }
   }, [searchQuery, companies]);
 
@@ -128,7 +135,10 @@ const RecentWork = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredCompanies &&
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            filteredCompanies &&
             filteredCompanies.map((company) => (
               <tr
                 onClick={() => handleRowClick(company._id)}
@@ -201,7 +211,8 @@ const RecentWork = () => {
                   )}
                 </td>
               </tr>
-            ))}
+            ))
+          )}
         </tbody>
       </table>
     </div>
