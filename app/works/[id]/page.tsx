@@ -49,11 +49,11 @@ const Page = () => {
   return (
     <div className="p-4">
       {/* Page Header */}
-      <h1 className="text-2xl md:text-3xl font-bold px-2 md:px-4 py-2 mb-4">
+      <h1 className="text-2xl md:text-3xl font-bold md:px-4 py-2 mb-4 mx-auto w-full">
         <span
-          className="cursor-pointer text-xl md:text-3xl font-bold px-2 md:px-4 py-1 md:py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800 transition mx-1 md:mx-2 text-center"
+          className="cursor-pointer px-3 py-1 mr-2  font-bold bg-blue-700 text-white rounded-md hover:bg-blue-800 transition text-center"
           onClick={() => route.back()}>
-          ←
+          &lsaquo;
         </span>
         Works
       </h1>
