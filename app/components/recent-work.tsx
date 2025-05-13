@@ -109,7 +109,7 @@ const RecentWork = () => {
   };
 
   return (
-    <div className="mb-32   max-h-[400px] md:mx-auto overflow-y-auto md:p-10 p-2">
+    <div className="mb-32 bg-gray-100    h-screen md:mx-auto overflow-y-auto md:p-10 p-2">
       <div>
         <div className="flex flex-row items-center justify-between w-full  p-2">
           <h4 className="font-bold text-sm md:text-2xl text-center md:text-left pb-2">
