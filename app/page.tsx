@@ -20,7 +20,7 @@ export default async function Home() {
 
   return (
     <main className="">
-      <div className="flex flex-row justify-between items-center px-4 pt-8">
+      <div className="flex flex-row justify-between items-center md:px-4 px-3 md:pt-8 pt-4">
         <h1 className="md:text-3xl text-xl font-bold text-center py-4 rounded-br-md rounded-bl-md text-shadow-lg/20 text-shadow-blue-500/30">
           Workshop Management
         </h1>
