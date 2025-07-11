@@ -23,8 +23,8 @@ const RecentWork = () => {
 
   useEffect(() => {
     const fetchCompanies = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         const { data } = await axios.get("/api/companies");
         setCompanies(data.data);
         setFilteredCompanies(data.data);
@@ -109,7 +109,7 @@ const RecentWork = () => {
   };
 
   return (
-    <div className="mb-32 bg-gray-100    h-screen md:mx-auto overflow-y-auto md:p-10 p-2">
+    <div className="max-h-[80vh] overflow-y-auto    border border-gray-400/50 m-2   rounded-md  md:p-10 mx-4">
       <div>
         <div className="flex flex-row items-center justify-between w-full  p-2">
           <h4 className="font-bold text-sm md:text-2xl text-center md:text-left pb-2">
@@ -126,7 +126,7 @@ const RecentWork = () => {
         </div>
       </div>
 
-      <table className="w-full table-auto border-separate border-spacing-0 text-left overflow-x-auto">
+      <table className="w-full table-auto table-fixed border-collapse  border-separate border-spacing-0 text-left ">
         <thead className="bg-gray-100 border-b-2 border-gray-300">
           <tr className="text-gray-600 uppercase text-sm font-medium [&>th:not(:last-child)]:border-r [&>th]:border-gray-300">
             <th className="px-4 py-3">Company</th>
@@ -136,7 +136,7 @@ const RecentWork = () => {
         </thead>
         <tbody>
           {isLoading ? (
-            <div>Loading...</div>
+            <div className="flex justify-center items-center">Loading...</div>
           ) : (
             filteredCompanies &&
             filteredCompanies.map((company) => (

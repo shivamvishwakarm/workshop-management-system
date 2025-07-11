@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json(); // Parse the request body
-        console.log(body);
+
         const company = await Company.create(body); // Create the company in the database
         return NextResponse.json({ success: true, data: company });
     } catch (error) {
@@ -51,7 +51,7 @@ export async function PUT(req: Request) {
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
     const body = await req.json(); // Parse the request body
-    console.log(`body: ${req}`)
+
     try {
         const updatedCompany = await Company.findByIdAndUpdate(id, body, { new: true });
         if (!updatedCompany) {
@@ -79,7 +79,7 @@ export async function DELETE(req: Request) {
         });
 
 
-        console.log(`deletedCompany: ${deletedCompany}`)
+
         return NextResponse.json({ success: true, data: deletedCompany });
     } catch (error) {
         console.error(error);

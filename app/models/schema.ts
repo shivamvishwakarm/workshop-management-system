@@ -11,14 +11,15 @@ export interface Companies extends Document {
 export interface Works extends Document {
     description: string;
     amount: number;
-    quantity: number | null;
+    quantity: {
+        type: number | null,
+        optional: true,
+    },
     status: string;
     date: Date;
     vehicleNo: string;
     company: mongoose.Schema.Types.ObjectId;
 }
-
-
 
 
 const CompanySchema = new mongoose.Schema<Companies>({
@@ -34,7 +35,7 @@ const WorkSchema = new mongoose.Schema<Works>({
     quantity: { type: Number, required: true },
     status: {
         type: String,
-        enum: ['Paid', 'Pending'],
+        enum: ['Paid', 'Pending', 'Billed'],
         default: 'Pending'
     },
     date: { type: Date, default: Date.now },

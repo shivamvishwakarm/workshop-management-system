@@ -28,7 +28,10 @@ export async function GET() {
 
             works.map((work: WorkRow) => {
                 const getWork = Work.findById(work._id);
-                console.log("works>>>>", getWork);
+                getWork.then((work) => {
+                    work.company = company._id;
+                    work.save();
+                });
             })
         });
 

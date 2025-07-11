@@ -1,16 +1,14 @@
 import React from "react";
 import Link from "next/link";
 
-const Navbar = () => {
+const AddWorkButton = () => {
   return (
-    <nav className="flex justify-center mx-2 fixed bottom-0 left-0 w-full text-center bg-white py-3 shadow-md ">
-      <Link
-        href={"/add-work"}
-        className="font-bold px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition md:w-auto w-full">
-        Add Work
-      </Link>
-    </nav>
+    <Link
+      href={"/add-work"}
+      className="px-4 py-3 rounded-lg bg-blue-700 text-white hover:bg-blue-500 font-semi-bold  shadow-lg shadow-blue-500/50 hover:shadow-none transition-all duration-300 ease-in-out text-xl">
+      Add Work
+    </Link>
   );
 };
 
-export default Navbar;
+export default AddWorkButton;
