@@ -16,30 +16,36 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: 'Failed to create company' }, { status: 500 });
     }
 }
-
 export async function GET() {
     await dbConnect();
-
     try {
-        // Fetch companies and their works in one step using population
-        const companies = await Company.find({})
-            .populate({
-                path: 'works',
-                match: { status: 'Pending' }, // Only include works with status 'Pending'
-                select: 'amount status' // Fetch only necessary fields
-            })
-            .lean();
+        const companies = await Company.aggregate([
+            {
+                $lookup: {
+                    from: "works",
+                    localField: "_id",
+                    foreignField: "company",
+                    as: "works",
+                    pipeline: [
+                        { $match: { status: "Pending" } },
+                        { $project: { amount: 1 } }
+                    ]
+                }
+            },
+            {
+                $addFields: {
+                    totalAmount: { $sum: "$works.amount" }
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    totalAmount: 1
+                }
+            }
+        ]);
 
-        // Calculate total amount for each company
-        const updatedCompanies = companies.map((company) => {
-            const totalAmount: number = company.works.reduce((sum: number, work: { amount: number }) => sum + work.amount, 0);
-            return { ...company, totalAmount };
-        });
-
-
-
-
-        return NextResponse.json({ success: true, data: updatedCompanies });
+        return NextResponse.json({ success: true, data: companies });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ success: false, message: 'Failed to fetch companies' }, { status: 500 });
