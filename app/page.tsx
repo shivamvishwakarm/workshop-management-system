@@ -2,6 +2,7 @@ import AddWorkButton from "./components/navbar";
 import RecentWork from "./components/recent-work";
 import dbConnect from "./lib/dbConnect";
 import { Work } from "./models/schema";
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   await dbConnect();
