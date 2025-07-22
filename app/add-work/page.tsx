@@ -230,7 +230,7 @@ const AddWorkForm = () => {
                       placeholder="Vehicle No."
                       type="text"
                       {...register(`workRows.${index}.vehicleNo`)}
-                      className="border border-gray-300 p-2 rounded w-full"
+                      className="border border-gray-300 p-2 rounded w-full uppercase"
                     />
                   </td>
                   <td className="p-2">
