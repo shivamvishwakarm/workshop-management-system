@@ -57,7 +57,7 @@ const Page = () => {
     try {
       const response = await axios.delete(`/api/jobs/?id=${id}`);
 
-      if (response.data.status === 200) {
+      if (response.data.success) {
         route.push("/");
       }
     } catch (error) {
