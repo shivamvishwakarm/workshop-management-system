@@ -38,19 +38,22 @@ const RecentWork = () => {
   });
   const router = useRouter();
 
-  const fetchCompanies = useCallback(async (page: number = 1, limit: number = 10) => {
-    setIsLoading(true);
-    try {
-      const { data } = await axios.get(`/api/companies?page=${page}&limit=${limit}`);
-      setCompanies(data.data);
-      setFilteredCompanies(data.data);
-      setPagination(data.pagination);
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      toast.error("Failed to fetch companies");
-      console.error(error);
-    }
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await axios.get("/api/companies");
+        setCompanies(data.data);
+        setFilteredCompanies(data.data);
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Failed to fetch companies");
+        console.error(error);
+      }
+    };
+
+    fetchCompanies();
   }, []);
 
   useEffect(() => {
@@ -116,8 +119,11 @@ const RecentWork = () => {
 
     try {
       await axios.delete(`/api/companies/?id=${id}`);
-      // Refresh current page after delete
-      fetchCompanies(pagination.currentPage, pagination.limit);
+      setCompanies((prevCompanies) =>
+        prevCompanies
+          ? prevCompanies.filter((company) => company._id !== id)
+          : null
+      );
       toast.success("Company deleted successfully");
     } catch (error) {
       toast.error("Failed to delete company");
@@ -180,34 +186,6 @@ const RecentWork = () => {
         </div>
       </td>
     </tr>
-  );
-
-  // Pagination Controls
-  const PaginationControls = () => (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
-      <div className="text-sm text-slate-600">
-        Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to{" "}
-        {Math.min(pagination.currentPage * pagination.limit, pagination.totalCount)} of{" "}
-        {pagination.totalCount} companies
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          className="btn btn-secondary py-1.5 px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => handlePageChange(pagination.currentPage - 1)}
-          disabled={pagination.currentPage === 1 || isLoading}>
-          Previous
-        </button>
-        <span className="text-sm text-slate-600 px-2">
-          Page {pagination.currentPage} of {pagination.totalPages}
-        </span>
-        <button
-          className="btn btn-secondary py-1.5 px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => handlePageChange(pagination.currentPage + 1)}
-          disabled={!pagination.hasMore || isLoading}>
-          Next
-        </button>
-      </div>
-    </div>
   );
 
   return (
@@ -353,9 +331,6 @@ const RecentWork = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Pagination Controls */}
-      {!isLoading && pagination.totalCount > 0 && <PaginationControls />}
     </div>
   );
 };
