@@ -3,6 +3,14 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/dbConnect';
 import { Company, Work } from '@/app/models/schema';
 
+interface WorkRow {
+    description: string;
+    quantity: string;
+    amount: number | null;
+    status: string;
+    date: string | null;
+    vehicleNo: string;
+}
 
 export async function POST(req: Request) {
     await dbConnect();
@@ -20,10 +28,11 @@ export async function POST(req: Request) {
             companyDoc = await Company.create({ name: company });
         }
 
-        const worksId: any[] = [];
+        const worksId: string[] = [];
         const workAmounts: number[] = [];
 
-        const workPromises = workRows.map(async (workRow: any) => {
+        // @typescript-eslint/no-explicit-any
+        const workPromises = workRows.map(async (workRow: WorkRow) => {
             const { description, amount, quantity, status, date, vehicleNo } = workRow;
             const work = await Work.create({
                 description,

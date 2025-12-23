@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/dbConnect';
-import { Company, Work } from '@/app/models/schema';
-import { WorkRow } from '@/app/utils/types';
+import { Company } from '@/app/models/schema';
 
 export async function GET() {
     await dbConnect();
