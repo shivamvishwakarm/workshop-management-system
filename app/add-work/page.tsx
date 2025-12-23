@@ -77,18 +77,20 @@ const AddWorkForm = () => {
   };
 
   const onSubmit = async (formData: FormData) => {
-    console.log("Form Data:", formData);
-    if (!formDataValidation(formData)) return;
+    if (!formDataValidation(formData)) {
+      return;
+    };
+
 
     try {
       const response = await axios.post("/api/jobs", formData);
       if (response.data.success) {
         router.push("/");
       }
-      console.log(response.data);
+
     } catch (error) {
       alert(error);
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -111,23 +113,22 @@ const AddWorkForm = () => {
   };
 
   const isSubmitDisabled = workRows.some((row) => {
-    const { description, quantity, amount, status, date } = row;
+    const { description, quantity, amount, status, date, vehicleNo } = row;
 
-    console.log("Row:", row); // Debugging row values
 
-    return (
-      description.trim() === "" || // Empty or whitespace-only description
-      quantity.trim() === "" || // Empty or whitespace-only quantity
-      amount === null ||
-      amount <= 0 || // Null or invalid amount
-      status.trim() === "" || // Empty or whitespace-only status
+    const isInvalid = (
+      !description || description.trim() === "" ||
+      !quantity || quantity.trim() === "" ||
+      amount === null || amount <= 0 ||
+      !status || status.trim() === "" ||
+      !vehicleNo || vehicleNo.trim() === "" ||
       !date ||
-      isNaN(Date.parse(date)) // Null or invalid date
+      isNaN(Date.parse(date))
     );
+
+    return isInvalid;
   });
 
-  // Debugging: Check if submit is disabled
-  console.log("isSubmitDisabled:", isSubmitDisabled);
 
   const handleRemoveRow = (index: number) => {
     if (fields.length === 1) {
@@ -143,7 +144,7 @@ const AddWorkForm = () => {
         const data = await axios.get("/api/companies");
         setCompanies(data.data.data);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
 
@@ -288,6 +289,7 @@ const AddWorkForm = () => {
               Add Row
             </button>
           </div>
+
         </div>
 
         {/* Total Amount */}
@@ -304,9 +306,12 @@ const AddWorkForm = () => {
         {/* Submit Button */}
         <div className="flex justify-center">
           <button
-            // disabled={isSubmitDisabled}
+            disabled={isSubmitDisabled}
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+            className={`px-6 py-2 rounded text-white ${isSubmitDisabled
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+              }`}>
             Submit
           </button>
         </div>

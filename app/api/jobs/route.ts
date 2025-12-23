@@ -3,6 +3,14 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/dbConnect';
 import { Company, Work } from '@/app/models/schema';
 
+interface WorkRow {
+    description: string;
+    quantity: string;
+    amount: number | null;
+    status: string;
+    date: string | null;
+    vehicleNo: string;
+}
 
 export async function POST(req: Request) {
     await dbConnect();
@@ -20,14 +28,30 @@ export async function POST(req: Request) {
             companyDoc = await Company.create({ name: company });
         }
 
-        const worksId = []
-        const workAmounts = [];
-        for (const workRow of workRows) {
+        const worksId: string[] = [];
+        const workAmounts: number[] = [];
+
+        // @typescript-eslint/no-explicit-any
+        const workPromises = workRows.map(async (workRow: WorkRow) => {
             const { description, amount, quantity, status, date, vehicleNo } = workRow;
-            const works = await Work.create({ description, amount, quantity: !quantity ? 0 : quantity, status, date, vehicleNo, company: companyDoc._id });
-            worksId.push(works._id);
-            workAmounts.push(works.amount);
-        }
+            const work = await Work.create({
+                description,
+                amount,
+                quantity: !quantity ? 0 : quantity,
+                status,
+                date,
+                vehicleNo,
+                company: companyDoc._id
+            });
+            return work;
+        });
+
+        const createdWorks = await Promise.all(workPromises);
+
+        createdWorks.forEach(work => {
+            worksId.push(work._id);
+            workAmounts.push(work.amount);
+        });
         companyDoc.totalAmount += workAmounts.map(amount => amount).reduce((a, b) => a + b, 0);
         companyDoc.works.push(...worksId);
         await companyDoc.save();
