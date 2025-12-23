@@ -2,6 +2,7 @@ import AddWorkButton from "./components/navbar";
 import RecentWork from "./components/recent-work";
 import dbConnect from "./lib/dbConnect";
 import { Work } from "./models/schema";
+import Logo from "./components/Logo";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -20,19 +21,37 @@ export default async function Home() {
   const totalPendingAmount = result[0]?.totalPendingAmount || 0;
 
   return (
-    <main className="">
-      <div className="flex flex-row justify-between items-center md:px-4 px-3 md:pt-8 pt-4">
-        <h1 className="md:text-3xl text-xl font-bold text-center py-4 rounded-br-md rounded-bl-md text-shadow-lg/20 text-shadow-blue-500/30">
-          Workshop Management
-        </h1>
+    <main className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className="page-header border-b border-slate-200 bg-white">
+        <div className="flex items-center gap-3">
+          <Logo />
+          <div className="flex flex-col">
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+              Vishwakarma
+            </h1>
+            <span className="text-xs font-semibold text-blue-600 tracking-[0.2em] uppercase">
+              Engineering
+            </span>
+          </div>
+        </div>
         <AddWorkButton />
       </div>
-      <div className="font-bold text-lg text-gray-400 px-4">
-        Total Pending Amount:{" "}
-        <span className="text-black font-bold ">₹{totalPendingAmount}</span>
+
+      {/* Stat Card */}
+      <div className="px-4 md:px-6 py-6">
+        <div className="stat-card max-w-sm">
+          <p className="stat-card-label">Total Pending Amount</p>
+          <p className="stat-card-value">
+            ₹{totalPendingAmount.toLocaleString("en-IN")}
+          </p>
+        </div>
       </div>
 
-      <RecentWork />
+      {/* Company Summary Table */}
+      <div className="px-4 md:px-6 pb-8">
+        <RecentWork />
+      </div>
     </main>
   );
 }

@@ -4,6 +4,8 @@ import axios from "axios";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+
 
 interface WorkRow {
   description: string;
@@ -32,9 +34,9 @@ const AddWorkForm = () => {
         {
           description: "",
           quantity: "",
-          amount: null, // Use `null` to represent an unset value
+          amount: null,
           status: "",
-          date: null, // Use `null` for an unset date
+          date: null,
           vehicleNo: "",
         },
       ],
@@ -46,10 +48,8 @@ const AddWorkForm = () => {
     name: "workRows",
   });
 
-  // Watch all rows or specific fields
   const workRows = watch("workRows");
 
-  // Calculate total dynamically by watching `amount` fields
   const totalAmount = workRows.reduce(
     (sum, row) => sum + (Number(row.amount) || 0),
     0
@@ -57,7 +57,7 @@ const AddWorkForm = () => {
 
   const formDataValidation = (formData: FormData) => {
     if (formData.company === "") {
-      alert("Please select a company.");
+      toast.error("Please select a company");
       return false;
     }
     formData.workRows.map((row) => {
@@ -68,7 +68,7 @@ const AddWorkForm = () => {
         !row.date ||
         !row.status
       ) {
-        alert("Please fill in all required fields.");
+        toast.error("Please fill in all required fields");
         return false;
       }
     });
@@ -77,27 +77,26 @@ const AddWorkForm = () => {
   };
 
   const onSubmit = async (formData: FormData) => {
-    console.log("Form Data:", formData);
-    if (!formDataValidation(formData)) return;
+    if (!formDataValidation(formData)) {
+      return;
+    }
 
     try {
       const response = await axios.post("/api/jobs", formData);
       if (response.data.success) {
+        toast.success("Work added successfully");
         router.push("/");
       }
-      console.log(response.data);
     } catch (error) {
-      alert(error);
-      console.log(error);
+      toast.error("Failed to add work");
+      console.error(error);
     }
   };
 
   const handleAddRow = () => {
     const lastRow = workRows[workRows.length - 1];
     if (lastRow.description.trim() === "" || !lastRow.amount) {
-      alert(
-        "Please fill in all fields of the last row before adding a new row."
-      );
+      toast.warning("Please fill in the last row before adding a new one");
       return;
     }
     append({
@@ -111,27 +110,28 @@ const AddWorkForm = () => {
   };
 
   const isSubmitDisabled = workRows.some((row) => {
-    const { description, quantity, amount, status, date } = row;
+    const { description, quantity, amount, status, date, vehicleNo } = row;
 
-    console.log("Row:", row); // Debugging row values
-
-    return (
-      description.trim() === "" || // Empty or whitespace-only description
-      quantity.trim() === "" || // Empty or whitespace-only quantity
+    const isInvalid =
+      !description ||
+      description.trim() === "" ||
+      !quantity ||
+      quantity.trim() === "" ||
       amount === null ||
-      amount <= 0 || // Null or invalid amount
-      status.trim() === "" || // Empty or whitespace-only status
+      amount <= 0 ||
+      !status ||
+      status.trim() === "" ||
+      !vehicleNo ||
+      vehicleNo.trim() === "" ||
       !date ||
-      isNaN(Date.parse(date)) // Null or invalid date
-    );
-  });
+      isNaN(Date.parse(date));
 
-  // Debugging: Check if submit is disabled
-  console.log("isSubmitDisabled:", isSubmitDisabled);
+    return isInvalid;
+  });
 
   const handleRemoveRow = (index: number) => {
     if (fields.length === 1) {
-      alert("At least one work row is required.");
+      toast.warning("At least one work row is required");
       return;
     }
     remove(index);
@@ -143,7 +143,7 @@ const AddWorkForm = () => {
         const data = await axios.get("/api/companies");
         setCompanies(data.data.data);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
 
@@ -151,166 +151,256 @@ const AddWorkForm = () => {
   }, []);
 
   return (
-    <div className="">
-      <Link className="text-blue-500 font-bold px-4 text-3xl" href="/">
-        ←{" "}
-      </Link>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="max-w-4xl mx-auto bg-gray-100 p-8 rounded-xl shadow-xl space-y-6">
-        <h2 className="text-2xl font-bold text-center">Form for Adding Work</h2>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 px-4 md:px-6 py-4">
+        <Link href="/" className="back-btn">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Dashboard
+        </Link>
+      </div>
 
-        {/* Company Field */}
-        <div className="grid md:grid-cols-2 gap-4">
-          {!customInput ? (
-            <select
-              {...register("company")}
-              className="border border-gray-300 p-2 rounded"
-              onChange={(e) => {
-                if (e.target.value === "custom") {
-                  setCustomInput(true);
-                  setValue("company", ""); // Clear the field
-                }
-              }}>
-              <option value="">Select Existing Company</option>
-              <option className="text-blue-500" value="custom">
-                Add New Company
-              </option>
-              {companies.map((company) => (
-                <option key={company._id} value={company.name}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="flex space-x-2 w-full">
-              <input
-                type="text"
-                {...register("company")}
-                className="border border-gray-300 p-2 rounded "
-                placeholder="Enter company name"
-              />
+      {/* Form */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Form Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+              Add New Work
+            </h1>
+            <p className="text-slate-500 mt-2">
+              Create work entries for a company
+            </p>
+          </div>
+
+          {/* Company Selection Card */}
+          <div className="form-card">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              Company Details
+            </h2>
+
+            <div className="form-group">
+              <label className="form-label">Company Name</label>
+              {!customInput ? (
+                <select
+                  {...register("company")}
+                  className="select"
+                  onChange={(e) => {
+                    if (e.target.value === "custom") {
+                      setCustomInput(true);
+                      setValue("company", "");
+                    }
+                  }}>
+                  <option value="">Select Existing Company</option>
+                  <option value="custom" className="text-blue-600 font-medium">
+                    + Add New Company
+                  </option>
+                  {companies.map((company) => (
+                    <option key={company._id} value={company.name}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    {...register("company")}
+                    className="input flex-1"
+                    placeholder="Enter company name"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setCustomInput(false)}
+                    className="btn btn-secondary whitespace-nowrap">
+                    Back to Select
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Work Rows Card */}
+          <div className="form-card">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              Work Entries
+            </h2>
+
+            <div className="overflow-x-auto -mx-6 md:-mx-8 px-6 md:px-8">
+              <table className="table w-full min-w-[800px]">
+                <thead>
+                  <tr className="bg-slate-800 text-white">
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider rounded-tl-lg">
+                      Description
+                    </th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider">
+                      Vehicle No.
+                    </th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider">
+                      Qty
+                    </th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider rounded-tr-lg w-16"></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white">
+                  {fields.map((field, index) => (
+                    <tr
+                      key={field.id}
+                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="px-3 py-3">
+                        <textarea
+                          {...register(`workRows.${index}.description`)}
+                          className="textarea min-h-[60px] text-sm"
+                          placeholder="Work description..."
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <input
+                          placeholder="MH12AB1234"
+                          type="text"
+                          {...register(`workRows.${index}.vehicleNo`)}
+                          className="input text-sm uppercase"
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <input
+                          placeholder="1"
+                          type="number"
+                          {...register(`workRows.${index}.quantity`)}
+                          className="input text-sm w-20"
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <input
+                          placeholder="₹0"
+                          type="number"
+                          {...register(`workRows.${index}.amount`)}
+                          className="input text-sm w-28 font-mono"
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <select
+                          {...register(`workRows.${index}.status`)}
+                          className="select text-sm">
+                          <option value="">Select</option>
+                          <option value="Pending">Pending</option>
+                          <option value="Paid">Paid</option>
+                          <option value="Billed">Billed</option>
+                        </select>
+                      </td>
+                      <td className="px-3 py-3">
+                        <input
+                          max={new Date().toISOString().split("T")[0]}
+                          type="date"
+                          {...register(`workRows.${index}.date`)}
+                          className="input text-sm"
+                        />
+                      </td>
+                      <td className="px-3 py-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRow(index)}
+                          className="btn-icon text-slate-400 hover:text-red-500 hover:bg-red-50"
+                          title="Remove row">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4">
               <button
                 type="button"
-                onClick={() => setCustomInput(false)}
-                className="text-blue-500 underline w-full">
-                Back to Select
+                onClick={handleAddRow}
+                className="btn btn-secondary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Row
               </button>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Work Rows Table */}
-        <div className="overflow-x-auto mt-4">
-          <table className="w-full text-left border border-gray-300 rounded-lg overflow-hidden">
-            <thead className="bg-gray-800 text-white">
-              <tr>
-                <th className="p-2">Work Description</th>
+          {/* Total Amount Card */}
+          <div className="stat-card">
+            <p className="stat-card-label">Total Amount</p>
+            <p className="stat-card-value">
+              ₹{totalAmount.toLocaleString("en-IN")}
+            </p>
+          </div>
 
-                <th className="p-2">Vehicle NO.</th>
-                <th className="p-2">Quantity</th>
-                <th className="p-2">Amount</th>
-                <th className="p-2">Status</th>
-
-                <th className="p-2">Date</th>
-                <th className="p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fields.map((field, index) => (
-                <tr key={field.id} className="bg-white border-b">
-                  <td className="p-2">
-                    <textarea
-                      {...register(`workRows.${index}.description`)}
-                      className="border border-gray-300 p-2 rounded w-full min-h-[60px]"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      placeholder="Vehicle No."
-                      type="text"
-                      {...register(`workRows.${index}.vehicleNo`)}
-                      className="border border-gray-300 p-2 rounded w-full uppercase"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      placeholder="Quantity"
-                      type="number"
-                      {...register(`workRows.${index}.quantity`)}
-                      className="border border-gray-300 p-2 rounded w-full"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      placeholder="Amount"
-                      type="number"
-                      {...register(`workRows.${index}.amount`)}
-                      className="border border-gray-300 p-2 rounded w-full"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <select
-                      {...register(`workRows.${index}.status`)}
-                      className="border border-gray-300 p-2 rounded w-full">
-                      <option value="">Select Status</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Paid">Paid</option>
-                      <option value="Billed">Billed</option>
-                    </select>
-                  </td>
-
-                  <td className="p-2">
-                    <input
-                      max={new Date().toISOString().split("T")[0]}
-                      type="date"
-                      {...register(`workRows.${index}.date`)}
-                      className="border border-gray-300 p-2 rounded w-full"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveRow(index)}
-                      className="text-red-600 underline">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="mt-2">
+          {/* Submit Button */}
+          <div className="flex justify-center pt-4">
             <button
-              type="button"
-              onClick={handleAddRow}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Add Row
+              disabled={isSubmitDisabled}
+              type="submit"
+              className={`btn px-8 py-3 text-base ${isSubmitDisabled
+                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                : "btn-success"
+                }`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Submit Work
             </button>
           </div>
-        </div>
-
-        {/* Total Amount */}
-        <div className="mt-4">
-          <label className="block font-medium mb-1">Total Amount</label>
-          <input
-            type="text"
-            value={totalAmount}
-            disabled
-            className="border border-gray-300 p-2 rounded w-full bg-gray-200"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <div className="flex justify-center">
-          <button
-            // disabled={isSubmitDisabled}
-            type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-            Submit
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

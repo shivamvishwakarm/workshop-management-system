@@ -36,11 +36,12 @@ const WorkSchema = new mongoose.Schema<Works>({
     status: {
         type: String,
         enum: ['Paid', 'Pending', 'Billed'],
-        default: 'Pending'
+        default: 'Pending',
+        index: true
     },
-    date: { type: Date, default: Date.now },
+    date: { type: Date, default: Date.now, index: true },
     vehicleNo: { type: String, required: true },
-    company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true, index: true },
 }, { timestamps: true });
 
 export const Company = mongoose.models.Company || mongoose.model<Companies>('Company', CompanySchema);
