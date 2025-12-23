@@ -132,26 +132,19 @@ const RecentWork = () => {
     }
   };
 
-  // Loading skeleton
-  const LoadingSkeleton = () => (
-    <>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <tr key={i} className="border-b border-slate-100">
-          <td className="px-4 py-4">
-            <div className="skeleton h-5 w-32"></div>
-          </td>
-          <td className="px-4 py-4">
-            <div className="skeleton h-5 w-24 ml-auto"></div>
-          </td>
-          <td className="px-4 py-4">
-            <div className="flex gap-2 justify-center">
-              <div className="skeleton h-8 w-8 rounded-lg"></div>
-              <div className="skeleton h-8 w-8 rounded-lg"></div>
-            </div>
-          </td>
-        </tr>
-      ))}
-    </>
+  // Loading spinner
+  const LoadingSpinner = () => (
+    <tr>
+      <td colSpan={3} className="px-4 py-16 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-slate-500 font-medium">Loading companies...</p>
+        </div>
+      </td>
+    </tr>
   );
 
   // Empty state
@@ -254,7 +247,7 @@ const RecentWork = () => {
           </thead>
           <tbody>
             {isLoading ? (
-              <LoadingSkeleton />
+              <LoadingSpinner />
             ) : filteredCompanies && filteredCompanies.length > 0 ? (
               filteredCompanies.map((company) => (
                 <tr
