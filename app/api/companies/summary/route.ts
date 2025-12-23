@@ -23,17 +23,10 @@ export async function GET() {
 
 
 
-        const companiesWithWorks = companies.map((company) => {
-            const works = company.works;
+        // Removed the side-effect map that was updating every work item on every read.
+        // If this logic is needed, it should be in a separate migration script or mutation endpoint.
 
-            works.map((work: WorkRow) => {
-                const getWork = Work.findById(work._id);
-                getWork.then((work) => {
-                    work.company = company._id;
-                    work.save();
-                });
-            })
-        });
+        const companiesWithWorks = companies;
 
 
 
