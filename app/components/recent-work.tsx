@@ -28,7 +28,7 @@ const RecentWork = () => {
   const [filteredCompanies, setFilteredCompanies] = useState<Job[] | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState<Pagination>({
     currentPage: 1,
     totalPages: 1,
