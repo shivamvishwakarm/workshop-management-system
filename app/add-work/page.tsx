@@ -140,7 +140,8 @@ const AddWorkForm = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const data = await axios.get("/api/companies");
+        // Fetch all companies by setting a high limit to override pagination
+        const data = await axios.get("/api/companies?limit=1000");
         setCompanies(data.data.data);
       } catch (error) {
         console.error(error);
