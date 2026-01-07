@@ -28,10 +28,17 @@ async function dbConnect() {
     }
 
     if (!cached.promise) {
-        cached.promise = mongoose.connect(MONGODB_URI, {
+        const opts: mongoose.ConnectOptions = {
             bufferCommands: false,
-        }).then((mongoose) => {
-            console.log("✅ MongoDB Connected!");
+        };
+
+        if (process.env.MONGODB_USER && process.env.MONGODB_PASSWORD) {
+            opts.user = process.env.MONGODB_USER;
+            opts.pass = process.env.MONGODB_PASSWORD;
+            opts.authSource = 'admin';
+        }
+
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
             return mongoose;
         });
     }
