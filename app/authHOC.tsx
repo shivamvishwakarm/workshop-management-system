@@ -138,9 +138,6 @@ const withAuth = (WrappedComponent: React.ComponentType<any>) => {
                         </div>
                     </form>
 
-                    <div className="mt-4 text-center text-xs text-slate-400 select-none">
-                        <p>Default credentials: admin / password</p>
-                    </div>
                 </div>
             </div>
         );

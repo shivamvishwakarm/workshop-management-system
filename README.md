@@ -1,1 +1,5 @@
-Workshop billing management tool
+
+Todo: 
+
+- add auth
+- fix recent work search
