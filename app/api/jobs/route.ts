@@ -19,9 +19,6 @@ export async function POST(req: Request) {
         const body = await req.json(); // Parse the request body
         const { company, workRows } = body;
 
-
-
-
         let companyDoc = await Company.findOne({ name: company });
 
         if (!companyDoc) {
