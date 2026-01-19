@@ -209,7 +209,7 @@ const RecentWork = () => {
           dataLength={filteredCompanies.length}
           next={fetchNext}
           hasMore={pagination.hasMore}
-          loader={<> Loading...</> }
+          loader={<> Loading...</>}
           scrollableTarget={undefined}
         >
           <table className="table table-zebra">
@@ -241,7 +241,7 @@ const RecentWork = () => {
                       )}
                     </td>
                     <td className="col-amount">
-                      ₹{company.totalAmount.toLocaleString("en-IN")}
+                      ₹{company?.totalAmount?.toLocaleString("en-IN")}
                     </td>
                     <td>
                       {editingCompanyId === company._id ? (
@@ -314,7 +314,7 @@ const RecentWork = () => {
                     </td>
                   </tr>
                 ))
-              ) : isLoading ? <LoadingSkeleton/> :  (
+              ) : isLoading ? <LoadingSkeleton /> : (
                 <EmptyState />
               )}
             </tbody>
