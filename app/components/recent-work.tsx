@@ -40,7 +40,9 @@ const RecentWork = () => {
 
   const fetchCompanies = useCallback(async (page: number = 1, limit: number = 10, append = false) => {
     try {
-      setIsLoading(true);
+      if (!append) {
+        setIsLoading(true);
+      }
 
       const { data } = await axios.get(`/api/companies?page=${page}&limit=${limit}`);
       if (append) {
@@ -66,7 +68,6 @@ const RecentWork = () => {
 
   const filteredCompanies = useMemo(() => {
     if (!searchQuery) return companies;
-    setIsLoading(false)
     return companies.filter(c =>
       c.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
