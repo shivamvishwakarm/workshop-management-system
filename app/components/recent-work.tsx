@@ -205,7 +205,7 @@ const RecentWork = () => {
           dataLength={filteredCompanies.length}
           next={fetchNext}
           hasMore={pagination.hasMore}
-          loader={<> Loading...</>}
+          loader={null}
           scrollableTarget={undefined}
         >
           <table className="table table-zebra">
